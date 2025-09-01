@@ -14,14 +14,14 @@ Note: This script requires the 'mklink_gui.hta' file to be in the same directory
 cscript /nologo mklink.vbs "C:\Path\To\DestinationFolder" "C:\Path\To\ListFile.txt"
 
 ### Parameters
-`%1`: Destination Folder: The folder where the new links will be created.
-`%2`: Source List File: A text file containing one source file or folder path per line.
+`%1`: Destination Folder: The folder where the new links will be created.  
+`%2`: Source List File: A text file containing one source file or folder path per line.  
 
 ### Exit Codes
-`0`: Success, no warnings.
-`1`: Script was cancelled by user.
-`2`: The base destination directory does not exist.
-`3`: Success, but with one or more warnings (e.g., source not found, destination exists).
+`0`: Success, no warnings.  
+`1`: Script was cancelled by user.  
+`2`: The base destination directory does not exist.  
+`3`: Success, but with one or more warnings (e.g., source not found, destination exists).  
 
 ## Installation
 
@@ -29,9 +29,9 @@ cscript /nologo mklink.vbs "C:\Path\To\DestinationFolder" "C:\Path\To\ListFile.t
 1. Copy all files in a folder anywhere to your disk.
 1. Configure a command or a single button in Total Commander :
 
-Command: `cscript`
-Parameters: `/noLogo "<path_of_mklink.vbs>\mklink.vbs" "%T" "%L"`
-Icon file: `<path_of_mklink.vbs>\mklink.ico`
-Tooltip: `Make NTFS Link`
+> Command: `cscript`  
+> Parameters: `/noLogo "<path_of_mklink.vbs>\mklink.vbs" "%T" "%L"`  
+> Icon file: `<path_of_mklink.vbs>\mklink.ico`  
+> Tooltip: `Make NTFS Link`  
 
 `<path_of_mklink.vbs>` is the path where you copied mklink.vbs.
