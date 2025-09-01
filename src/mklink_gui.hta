@@ -1,0 +1,134 @@
+<html>
+<head>
+<title>Create Link</title>
+<hta:application 
+    id='app' 
+    border='dialog' 
+    borderStyle='normal' 
+    caption='yes' 
+    contextMenu='no' 
+    innerBorder='no' 
+    maximizeButton='no' 
+    minimizeButton='no' 
+    navigable='no' 
+    scroll='no' 
+    singleInstance='yes' 
+    showInTaskbar='no' 
+    sysMenu='yes' 
+    version='1.0' 
+    windowState='normal'
+>
+<style>
+    body {font-family: Segoe UI, sans-serif; background-color: #F0F0F0; font-size: 9pt;}
+    table {font-size: 9pt;}
+    .button {width: 80px; height: 24px;}
+    input[type=text] {width: 400px; padding: 2px;}
+</style>
+</head>
+<body>
+
+<script language='VBScript'>
+  Dim fso, strResultFile
+  Set fso = CreateObject("Scripting.FileSystemObject")
+
+  Sub Window_OnLoad()
+      self.resizeTo 550, 200
+      CenterWindow()
+      ParseCommandLine()
+      CheckOKButton()
+  End Sub
+
+  Sub ParseCommandLine()
+      Dim strFullCmd, arrParts
+      strFullCmd = app.commandLine
+      arrParts = Split(strFullCmd, """")
+      
+      If UBound(arrParts) >= 3 Then
+          document.getElementById("destPath").value = arrParts(3)
+      End If
+      
+      If UBound(arrParts) >= 5 Then
+          strResultFile = arrParts(5)
+      Else
+          MsgBox "Error: Could not read result file path from arguments.", vbCritical, "Argument Error"
+          self.close()
+      End If
+  End Sub
+
+  Sub CenterWindow()
+      self.moveTo (screen.availWidth/2) - (self.document.body.clientWidth/2), (screen.availHeight/2) - (self.document.body.clientHeight/2)
+  End Sub
+
+  Sub CheckOKButton()
+      document.getElementById("okButton").disabled = (Trim(document.getElementById("destPath").value) = "")
+  End Sub
+
+  ' Bad limitation on Windows BrowseForFolder : "The user cannot browse higher in the tree than this folder."
+  ' https://learn.microsoft.com/en-us/windows/win32/shell/shell-browseforfolder
+  Sub BrowseFolder()
+      Dim objShell, objFolder, strStartPath, strInitialPath
+      Set objShell = CreateObject("Shell.Application")
+      strInitialPath = document.getElementById("destPath").value
+      strStartPath = strInitialPath
+
+      On Error Resume Next
+      Do While Not fso.FolderExists(strStartPath) And strStartPath <> ""
+          strStartPath = fso.GetParentFolderName(strStartPath)
+      Loop
+      On Error GoTo 0
+
+      If strStartPath = "" Then
+          strStartPath = &H11 ' ssfDRIVES constant (This PC)
+      End If
+      
+      Set objFolder = objShell.BrowseForFolder(0, "Select a destination folder:", &H71, &H11)
+      
+      If Not objFolder Is Nothing Then
+          document.getElementById("destPath").value = objFolder.Self.Path
+      End If
+      CheckOKButton()
+  End Sub
+
+  Sub OK_Click()
+      Dim objResultFile
+      Set objResultFile = fso.CreateTextFile(strResultFile, True)
+      objResultFile.WriteLine(document.getElementById("destPath").value)
+      objResultFile.WriteLine(document.getElementById("hardLinkCheck").checked)
+      objResultFile.Close()
+      self.close()
+  End Sub
+
+  Sub Cancel_Click()
+      Dim objResultFile
+      Set objResultFile = fso.CreateTextFile(strResultFile, True)
+      objResultFile.WriteLine("CANCEL")
+      objResultFile.Close()
+      self.close()
+  End Sub
+</script>
+
+<table>
+    <tr><td>Destination:</td></tr>
+    <tr>
+        <td>
+            <input type='text' id='destPath' onkeyup='CheckOKButton' value=''> 
+            <input type='button' class='button' value='Browse...' onclick='BrowseFolder'>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <br>
+            <input type='checkbox' id='hardLinkCheck'> Make hardlink or directory junction if file or directory is in the same volume.
+        </td>
+    </tr>
+    <tr>
+        <td align='left'>
+            <br><br>
+            <input type='button' id='okButton' class='button' value='OK' onclick='OK_Click'> 
+            <input type='button' class='button' value='Cancel' onclick='Cancel_Click'>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
